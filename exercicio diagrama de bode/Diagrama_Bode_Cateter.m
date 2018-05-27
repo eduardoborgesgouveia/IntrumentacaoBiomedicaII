@@ -84,6 +84,5 @@ SistemaComBolha = tf([1 frequenciaNaturalComBolha^2],[1 ...
 %% Plotagem
 
 bode(SistemaSemBolha,SistemaComBolha);
-legend('Resposta do sistema sem bolha', 'Resposta do sistema com bolha');
-set(gca,'fontsize',13,'fontWeight','bold');
 set(cstprefs.tbxprefs, 'FrequencyUnits', 'Hz');
+legend('Resposta do sistema sem bolha', 'Resposta do sistema com bolha');
