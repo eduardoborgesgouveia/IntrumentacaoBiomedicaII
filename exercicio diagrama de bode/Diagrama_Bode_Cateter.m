@@ -29,14 +29,61 @@ Autor: Eduardo Borges Gouveia
 Contato: eduardoborgesgouveia@gmail.com
 %}
 clear;
-%%
+%% Input de dados
 fprintf('Entre com os seguintes dados: \n\n');
-comprimentoCateter = input('Comprimento do cateter [m]:  ');
+cumprimentoCateter = input('Comprimento do cateter [m]:  ');
 raioCateter = input('Raio interno do cateter [m]:  ');
-comprimentoBolhaAr = input('Comprimento da bolha de ar [m]: ');
-i=0;
+cumprimentoBolhaAr = input('Comprimento da bolha de ar [m]: ');
 
+%% Calculations
 
+%constantes
+Ed = 0.49*10^15;
+Cd = 1/Ed;
 
+%Cálculo da frequencia natural sem a bolha
+frequenciaNaturalSemBolha = (raioCateter/2)*((1/(pi*cumprimentoCateter))*...
+    ((0.49*10^15)/(1*10^3)))^(1/2);
 
+%Cálculo da razão de amortecimento sem a bolha
+razaoAmortecimentoSemBolha = ((4*0.001)/(raioCateter^3))*((1/pi)*(1/...
+    ((1*10^3)*(0.49*10^15))))^(1/2);
 
+%Cálculo da frequencia natural com a bolha
+Cb = (((pi*(raioCateter^2)*cumprimentoBolhaAr))/1000)/(98.5);
+
+frequenciaNaturalComBolha = frequenciaNaturalSemBolha*(sqrt(Cd/Cb));
+
+%Cálculo da razão de amortecimento com a bolha
+Ct = Cd + Cb;
+
+razaoAmortecimentoComBolha = razaoAmortecimentoSemBolha*(sqrt(Ct/Cd));
+
+%% Sistema
+
+%{
+   Data format:
+     For SISO models, NUM and DEN are row vectors listing the numerator
+     and denominator coefficients in descending powers of s,p,z,q.
+     For example,
+        sys = tf([1 2],[1 0 10])
+     specifies the transfer function (s+2)/(s^2+10)
+
+       considerando nosso sistema de segunda ordem:
+            (s + Wn^2)/(s^2 + 2*amort*Wn + Wn^2)
+%}
+
+SistemaSemBolha = tf([1 frequenciaNaturalSemBolha^2],[1 ...
+    2*razaoAmortecimentoSemBolha*frequenciaNaturalSemBolha ...
+    frequenciaNaturalSemBolha^2]);
+
+SistemaComBolha = tf([1 frequenciaNaturalComBolha^2],[1 ...
+    2*razaoAmortecimentoComBolha*frequenciaNaturalComBolha ...
+    frequenciaNaturalComBolha^2]);
+    
+%% Plotagem
+
+bode(SistemaSemBolha,SistemaComBolha);
+legend('Resposta do sistema sem bolha', 'Resposta do sistema com bolha');
+set(gca,'fontsize',13,'fontWeight','bold');
+set(cstprefs.tbxprefs, 'FrequencyUnits', 'Hz');
